@@ -9,7 +9,6 @@ import com.kotlindiscord.kord.extensions.commands.converters.impl.defaultingStri
 import com.kotlindiscord.kord.extensions.commands.converters.impl.string
 import com.kotlindiscord.kord.extensions.extensions.Extension
 import com.kotlindiscord.kord.extensions.extensions.publicSlashCommand
-import dev.kord.rest.builder.message.embed
 import org.springframework.stereotype.Component
 import java.time.Instant
 import java.time.OffsetDateTime
@@ -62,8 +61,7 @@ class CommandExtension : Extension() {
 		timestamp: Long,
 		format: String
 	) {
-		val timestampString = "<t:$timestamp:$format>"
-		respond { embed { description = "$timestampString (`$timestampString`)" } }
+		respond { content = "<t:$timestamp:$format>" }
 	}
 
 	open inner class TimestampCommandArguments : Arguments() {
