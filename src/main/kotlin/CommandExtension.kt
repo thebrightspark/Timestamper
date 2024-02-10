@@ -18,7 +18,8 @@ import java.time.ZoneOffset
 @Component
 class CommandExtension : Extension() {
 	companion object {
-		private val REGEX_TIME = Regex("^(?<hour>\\d{1,2})(?::(?<minute>\\d{2}))?(?<ampm>am|pm)?$")
+		private val REGEX_TIME = Regex("^\\s*(?<hour>\\d{1,2})(?:\\s*:\\s*(?<minute>\\d{2}))?\\s*(?<ampm>am|pm)?\\s*$")
+		private val DEFAULT_FORMAT = TimestampFormat.SHORT_TIME
 	}
 
 	override val name: String = "commands"
@@ -70,7 +71,7 @@ class CommandExtension : Extension() {
 			name = "format"
 			description = "The timestamp format"
 			typeName = "Timestamp Format"
-			defaultValue = TimestampFormat.SHORT_DATE_TIME
+			defaultValue = DEFAULT_FORMAT
 		}
 	}
 
@@ -105,7 +106,7 @@ class CommandExtension : Extension() {
 		}
 		val offset: String by defaultingString {
 			name = "offset"
-			description = "The time zone offset"
+			description = "The time zone offset - examples: Z, +10, -6, +06:30, -0730"
 			defaultValue = "Z"
 			validate {
 				failIf("Invalid offset!") {
@@ -117,7 +118,7 @@ class CommandExtension : Extension() {
 			name = "format"
 			description = "The timestamp format"
 			typeName = "Timestamp Format"
-			defaultValue = TimestampFormat.SHORT_TIME
+			defaultValue = DEFAULT_FORMAT
 		}
 	}
 
