@@ -32,29 +32,39 @@ class CommandExtension : Extension() {
 				name = "now"
 				description = "Gets the timestamp of the time now"
 
-				action { respondWithTimestamp(Instant.now().epochSecond, arguments.format.code) }
+				action { timestampNowAction(this, arguments.format) }
 			}
 
 			publicSubCommand(::TimestampAtCommandArguments) {
 				name = "at"
 				description = "Gets the timestamp of the given time"
 
-				action {
-					val timeMatch = REGEX_TIME.matchEntire(arguments.time)!!
-					val ampm = timeMatch.groups["ampm"]?.value
-					val hour = timeMatch.groups["hour"]!!.value.toInt()
-					val hour24 = ampm?.let { if (it == "pm") hour + 12 else hour } ?: hour
-					val minute = timeMatch.groups["minute"]?.value?.toInt()
-
-					val timeNow = OffsetDateTime.now(ZoneOffset.of(arguments.offset))
-					var timeAt = timeNow.withHour(hour24)
-					minute?.let { timeAt = timeAt.withMinute(it) }
-					if (timeAt < timeNow) timeAt = timeAt.plusDays(1)
-
-					respondWithTimestamp(timeAt.toEpochSecond(), arguments.format.code)
-				}
+				action { timestampAtAction(this, arguments.time, arguments.offset, arguments.format) }
 			}
 		}
+	}
+
+	suspend fun timestampNowAction(ctx: PublicSlashCommandContext<out Arguments, *>, format: TimestampFormat) {
+		ctx.respondWithTimestamp(Instant.now().epochSecond, format.code)
+	}
+
+	suspend fun timestampAtAction(
+		ctx: PublicSlashCommandContext<out Arguments, *>,
+		time: String,
+		offset: String,
+		format: TimestampFormat
+	) {
+		val timeMatch = REGEX_TIME.matchEntire(time)!!
+		val ampm = timeMatch.groups["ampm"]?.value
+		val hour = timeMatch.groups["hour"]!!.value.toInt()
+		val hour24 = ampm?.let { if (it == "pm") hour + 12 else hour } ?: hour
+		val minute = timeMatch.groups["minute"]?.value?.toInt() ?: 0
+
+		val timeNow = OffsetDateTime.now(ZoneOffset.of(offset))
+		var timeAt = timeNow.withHour(hour24).withMinute(minute)
+		if (timeAt < timeNow) timeAt = timeAt.plusDays(1)
+
+		ctx.respondWithTimestamp(timeAt.toEpochSecond(), format.code)
 	}
 
 	private suspend fun PublicSlashCommandContext<out Arguments, *>.respondWithTimestamp(
